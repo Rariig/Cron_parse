@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "cron-parser": "^4.6.0",
+    "tsc": "^2.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.9"
+  }
+}
