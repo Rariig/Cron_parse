@@ -9,19 +9,6 @@ function addDays(date, days) {
 
 
 var cronExprArray = ['0 */12 * * *','0 0 * * MON-FRI', '0 */6 * * *']
-var startAndEndTimeArray = [];
-
-function Cron_parse(cronExpressionsArray, numberOfDays) {
-    
-    var options = {
-        currentDate: new Date(),
-        endDate: addDays(Date(), numberOfDays),
-        iterator: true
-    };
-    for (let i = 0; i < cronExpressionsArray.length; i++) {
-        startAndEndTimeArray.push(parser.parseExpression(cronExprArray[i], options));
-    }
-}
 
 function getMonthFromString(mon){
     return new Date(Date.parse(mon +" 1, 2012")).getMonth()+1
@@ -36,28 +23,28 @@ function Convert_cron_value_to_date(cron_value){
     return finalDate;
 }
 
-function Find_smallest_cron() {
-    var options2 = {
+function Find_smallest_cron(inputCronArray, numberOfDays) {
+    var options = {
         currentDate: new Date(),
-        endDate: addDays(Date(), 21),
+        endDate: addDays(Date(), numberOfDays),
         iterator: true
     };
     var testArray = new Array();
     var smallestInterval;
     x = 0;
 
-    for (var i = 0; i < cronExprArray.length; i++) {
-        var interval = parser.parseExpression(cronExprArray[i], options2);
+    for (var i = 0; i < inputCronArray.length; i++) {
+        var interval = parser.parseExpression(inputCronArray[i], options);
         var obj = interval.next();
         obj = interval.next();
         testArray.push(obj.value);
         if (testArray.length > 1) {
             if (Convert_cron_value_to_date(testArray[x]).getTime() < Convert_cron_value_to_date(testArray[i]).getTime()) {
-                var interval = parser.parseExpression(cronExprArray[x], options2);
+                var interval = parser.parseExpression(inputCronArray[x], options);
                 smallestInterval = interval;
             }
             else if (Convert_cron_value_to_date(testArray[x]).getTime() > Convert_cron_value_to_date(testArray[i]).getTime()) {
-                var interval = parser.parseExpression(cronExprArray[i], options2);
+                var interval = parser.parseExpression(inputCronArray[i], options);
                 x = i;
                 smallestInterval = interval;
             }
@@ -67,8 +54,7 @@ function Find_smallest_cron() {
 }
 
 try {
-    Cron_parse(cronExprArray, 21);
-    var smallestInterval = Find_smallest_cron();
+    var smallestInterval = Find_smallest_cron(cronExprArray, 21);
     while (true) {
         try {
             var obj = smallestInterval.next();
