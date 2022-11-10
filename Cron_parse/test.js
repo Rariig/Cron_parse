@@ -7,12 +7,13 @@ function addTestDays(date, days) {
 }
 var options = {
     currentDate: new Date(),
-    endDate: addTestDays(Date(), 1),
+    endDate: addTestDays(Date(), 21),
     iterator: true
 };
 var startAndEndTimeArray = Array();
 try {
-    var interval = parser.parseExpression('*/60 */1 * * *', options);
+    var interval = parser.parseExpression('* * * * * MON', options);
+    var interval2 = parser.parseExpression('*/60 */1 * * *', options);
     while (true) {
         try {
             var obj = interval.next();

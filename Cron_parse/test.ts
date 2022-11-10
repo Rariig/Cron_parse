@@ -8,14 +8,15 @@ function addTestDays(date, days) {
   }
 var options = {
   currentDate: new Date(),
-  endDate: addTestDays(Date(), 1),
+  endDate: addTestDays(Date(), 21),
   iterator: true
 };
 
 //var startAndEndTimeArray: string [] = Array()
 try {
     
-  var interval = parser.parseExpression('*/60 */1 * * *', options);
+  var interval = parser.parseExpression('0 0 * * MON', options);
+  var interval = parser.parseExpression('0 0 * * MON-FRI', options);
   
   while (true) {
     try {
