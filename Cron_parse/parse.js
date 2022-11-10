@@ -1,4 +1,5 @@
 var parser = require('cron-parser');
+const { get } = require('https');
 
 function addDays(date, days) {
     var result = new Date(date);
@@ -8,7 +9,7 @@ function addDays(date, days) {
 }
 
 
-var cronExprArray = ['0 0 * * MON','0 0 * * MON-FRI']
+var cronExprArray = ['0 12 * * *','0 0 * * MON-FRI']
 var startAndEndTimeArray = [];
 
 function Cron_parse(cronExpressionsArray, numberOfDays) {
@@ -23,57 +24,70 @@ function Cron_parse(cronExpressionsArray, numberOfDays) {
     }
 }
 
-    function Compare_dates(inputInterval1, inputInterval2) {
-        var testArray = new Array();
-        var testArray2 = new Array();
-        ;
-        for (var i = 0; i < 2; i++) {
-            var obj = inputInterval1.next();
-            testArray.push(obj.value);
-        }
-        for (var i = 0; i < 2; i++) {
-            var obj2 = inputInterval2.next();
-            testArray2.push(obj2.value);
-        }
-        
-        if (testArray[1] < testArray2[1]) {
-            return inputInterval1;
-        }
-        else if (testArray[1] > testArray2[1]) {
-            return inputInterval2;
-        }
-    }
+function getMonthFromString(mon){
+    return new Date(Date.parse(mon +" 1, 2012")).getMonth()+1
+ }
 
-    try {
-        Cron_parse(cronExprArray, 21);
-        /*for (var i = 0; i < startAndEndTimeArray.length; i++) {
-            for (var j = 0; j < startAndEndTimeArray.length; j++) {
-               if(i!=j) {
-                
-               }
-            }
-        }*/
-        var smallestInterval = Compare_dates(startAndEndTimeArray[0], startAndEndTimeArray[1]);
-        
-        
-        while (true) {
-            try {
-                var obj = smallestInterval.next();
-                console.log(obj.value.toString(), ' ', obj.done);
-            }
-            catch (e) {
-                break;
-            }
+function Convert_cron_value_to_date(cron_value){
+    month = getMonthFromString(String(cron_value).substring(4,7));
+    day = (String(cron_value).substring(8,10));
+    year = (String(cron_value).substring(11,15));
+    time = (String(cron_value).substring(16,24));
+    finalDate = new Date(String(month + '/' + day + '/' + year + ' '+ time));
+    return finalDate;
+}
+
+function Compare_dates(inputInterval1, inputInterval2) {
+    var testArray = new Array();
+    var testArray2 = new Array();
+    ;
+    for (var i = 0; i < 2; i++) {
+        var obj = inputInterval1.next();
+        testArray.push(obj.value);
+    }
+    for (var i = 0; i < 2; i++) {
+        var obj2 = inputInterval2.next();
+        testArray2.push(obj2.value);
+    }
+    
+    if (Convert_cron_value_to_date(testArray[1]).getTime() < Convert_cron_value_to_date(testArray2[1]).getTime()) {
+        return inputInterval1;
+    }
+    else if (Convert_cron_value_to_date(testArray[1]).getTime() > Convert_cron_value_to_date(testArray2[1]).getTime()) {
+        return inputInterval2;
+    }
+}
+
+try {
+    Cron_parse(cronExprArray, 21);
+    /*for (var i = 0; i < startAndEndTimeArray.length; i++) {
+        for (var j = 0; j < startAndEndTimeArray.length; j++) {
+           if(i!=j) {
+            
+           }
         }
-        // value: Wed Dec 26 2012 14:44:00 GMT+0200 (EET) done: false
-        // value: Wed Dec 26 2012 15:00:00 GMT+0200 (EET) done: false
-        // value: Wed Dec 26 2012 15:22:00 GMT+0200 (EET) done: false
-        // value: Wed Dec 26 2012 15:44:00 GMT+0200 (EET) done: false
-        // value: Wed Dec 26 2012 16:00:00 GMT+0200 (EET) done: false
-        // value: Wed Dec 26 2012 16:22:00 GMT+0200 (EET) done: true
+    }*/
+    var smallestInterval = Compare_dates(startAndEndTimeArray[0], startAndEndTimeArray[1]);
+    
+    
+    while (true) {
+        try {
+            var obj = smallestInterval.next();
+            console.log(obj.value.toString(), ' ', obj.done);
+        }
+        catch (e) {
+            break;
+        }
     }
-    catch (err) {
-        console.log('Error: ' + err.message);
-    }
+    // value: Wed Dec 26 2012 14:44:00 GMT+0200 (EET) done: false
+    // value: Wed Dec 26 2012 15:00:00 GMT+0200 (EET) done: false
+    // value: Wed Dec 26 2012 15:22:00 GMT+0200 (EET) done: false
+    // value: Wed Dec 26 2012 15:44:00 GMT+0200 (EET) done: false
+    // value: Wed Dec 26 2012 16:00:00 GMT+0200 (EET) done: false
+    // value: Wed Dec 26 2012 16:22:00 GMT+0200 (EET) done: true
+}
+catch (err) {
+    console.log('Error: ' + err.message);
+}
 
     
