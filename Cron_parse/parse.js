@@ -1,5 +1,4 @@
 var parser = require('cron-parser');
-const { get } = require('https');
 
 function addDays(date, days) {
     var result = new Date(date);
@@ -9,7 +8,7 @@ function addDays(date, days) {
 }
 
 
-var cronExprArray = ['0 12 * * *','0 0 * * MON-FRI']
+var cronExprArray = ['0 */12 * * *','0 0 * * MON-FRI', '0 */6 * * *']
 var startAndEndTimeArray = [];
 
 function Cron_parse(cronExpressionsArray, numberOfDays) {
@@ -37,39 +36,39 @@ function Convert_cron_value_to_date(cron_value){
     return finalDate;
 }
 
-function Compare_dates(inputInterval1, inputInterval2) {
+function Find_smallest_cron() {
+    var options2 = {
+        currentDate: new Date(),
+        endDate: addDays(Date(), 21),
+        iterator: true
+    };
     var testArray = new Array();
-    var testArray2 = new Array();
-    ;
-    for (var i = 0; i < 2; i++) {
-        var obj = inputInterval1.next();
+    var smallestInterval;
+    x = 0;
+
+    for (var i = 0; i < cronExprArray.length; i++) {
+        var interval = parser.parseExpression(cronExprArray[i], options2);
+        var obj = interval.next();
+        obj = interval.next();
         testArray.push(obj.value);
+        if (testArray.length > 1) {
+            if (Convert_cron_value_to_date(testArray[x]).getTime() < Convert_cron_value_to_date(testArray[i]).getTime()) {
+                var interval = parser.parseExpression(cronExprArray[x], options2);
+                smallestInterval = interval;
+            }
+            else if (Convert_cron_value_to_date(testArray[x]).getTime() > Convert_cron_value_to_date(testArray[i]).getTime()) {
+                var interval = parser.parseExpression(cronExprArray[i], options2);
+                x = i;
+                smallestInterval = interval;
+            }
+        }
     }
-    for (var i = 0; i < 2; i++) {
-        var obj2 = inputInterval2.next();
-        testArray2.push(obj2.value);
-    }
-    
-    if (Convert_cron_value_to_date(testArray[1]).getTime() < Convert_cron_value_to_date(testArray2[1]).getTime()) {
-        return inputInterval1;
-    }
-    else if (Convert_cron_value_to_date(testArray[1]).getTime() > Convert_cron_value_to_date(testArray2[1]).getTime()) {
-        return inputInterval2;
-    }
+    return smallestInterval;
 }
 
 try {
     Cron_parse(cronExprArray, 21);
-    /*for (var i = 0; i < startAndEndTimeArray.length; i++) {
-        for (var j = 0; j < startAndEndTimeArray.length; j++) {
-           if(i!=j) {
-            
-           }
-        }
-    }*/
-    var smallestInterval = Compare_dates(startAndEndTimeArray[0], startAndEndTimeArray[1]);
-    
-    
+    var smallestInterval = Find_smallest_cron();
     while (true) {
         try {
             var obj = smallestInterval.next();
