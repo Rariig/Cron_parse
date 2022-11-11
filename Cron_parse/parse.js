@@ -8,7 +8,7 @@ function addDays(date, days) {
 }
 
 
-var cronExprArray = ['0 */12 * * *','0 0 * * MON-FRI', '0 */6 * * *']
+var cronExprArray = ['0 */12 * * *','0 */6 * * *', '0 0 * * MON-FRI' ]
 
 function getMonthFromString(mon){
     return new Date(Date.parse(mon +" 1, 2012")).getMonth()+1
