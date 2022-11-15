@@ -7,8 +7,75 @@ function addDays(date, days) {
     return result;
 }
 
+let cronWithTaskLength  = class{
+    
+    constructor(cronExpression, taskLengthInMinutes){
+    cronExpression;
+    taskLengthInMinutes;
+    }
+}
+let taskDates  = class{
+    constructor(startDate, endDate){
+     startDate;
+     endDate;
+    }
+}
 
-var cronExprArray = ['0 */12 * * *','0 */6 * * *', '0 0 * * MON-FRI' ]
+function addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes*60000);
+}
+
+var cronExprArray = ['0 0 * * MON']
+var cronsWithLengthsArray = [];
+var taskDatesArray = [];
+
+function populateCronsWithLengths(){
+    for (let i = 0; i <cronExprArray.length ; i++) {
+        var obj = {};
+        obj.cronExpression = cronExprArray[i];
+        obj.taskLengthInMinutes = 45;
+        cronsWithLengthsArray.push(obj);
+    }
+}
+
+function findEndDates(numberOfDays){
+    var options = {
+        currentDate: new Date(),
+        endDate: addDays(Date(), numberOfDays),
+        iterator: true
+    };
+    populateCronsWithLengths();
+    for (let i = 0; i < cronsWithLengthsArray.length; i++) {
+        var interval = parser.parseExpression(cronsWithLengthsArray[i].cronExpression, options);
+        var obj = {};
+        obj.startDate =Convert_cron_value_to_date(interval.next().value);
+        interval.next();
+        obj.endDate = addMinutes(Convert_cron_value_to_date(interval.prev().value), cronsWithLengthsArray[i].taskLengthInMinutes);
+        taskDatesArray.push(obj);
+    }
+}
+
+
+
+try {
+    var smallestInterval = Find_smallest_cron(cronExprArray, 21);
+    while (true) {
+        try {
+            var obj = smallestInterval.next();
+            findEndDates(21);
+            for (let i = 0; i < taskDatesArray.length; i++) {
+                console.log('Start date: ' + taskDatesArray[i].startDate + 'End date: ' + taskDatesArray[i].endDate);
+            }
+            
+        }
+        catch (e) {
+            break;
+        }
+    }
+}
+catch (err) {
+    console.log('Error: ' + err.message);
+}
 
 function getMonthFromString(mon){
     return new Date(Date.parse(mon +" 1, 2012")).getMonth()+1
@@ -49,11 +116,15 @@ function Find_smallest_cron(inputCronArray, numberOfDays) {
                 smallestInterval = interval;
             }
         }
+        else if (testArray.length == 1) {
+            var interval = parser.parseExpression(inputCronArray[i], options);
+            smallestInterval = interval;
+        }
     }
     return smallestInterval;
 }
 
-try {
+/*try {
     var smallestInterval = Find_smallest_cron(cronExprArray, 21);
     while (true) {
         try {
@@ -73,6 +144,6 @@ try {
 }
 catch (err) {
     console.log('Error: ' + err.message);
-}
+}*/
 
     
