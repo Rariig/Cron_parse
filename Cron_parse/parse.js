@@ -1,4 +1,5 @@
 var parser = require('cron-parser');
+var mergeRanges = require('merge-ranges');
 
 function addDays(date, days) {
     var result = new Date(date);
@@ -25,52 +26,53 @@ function addMinutes(date, minutes) {
     return new Date(date.getTime() + minutes*60000);
 }
 
-var cronExprArray = ['0 0 * * MON']
+var cronExprArray = ['0 0 * * MON', '0 0 * * MON-FRI', '0 0 * * MON-WED'];
+var taskLengthsArray = [45, 60, 120];
 var cronsWithLengthsArray = [];
-var taskDatesArray = [];
+var allTaskDatesArray = [];
+var finalArray= [];
 
 function populateCronsWithLengths(){
     for (let i = 0; i <cronExprArray.length ; i++) {
         var obj = {};
         obj.cronExpression = cronExprArray[i];
-        obj.taskLengthInMinutes = 45;
+        obj.taskLengthInMinutes = taskLengthsArray[i];
         cronsWithLengthsArray.push(obj);
     }
 }
 
-function findEndDates(startDate, numberOfDays){
+function findEndDates(cronsWithLengthsArray, numberOfDays){
     var options = {
         currentDate: new Date(),
         endDate: addDays(Date(), numberOfDays),
         iterator: true
     };
     
-    for (let i = 0; i < cronsWithLengthsArray.length; i++) {
+    for (let i = 0; i < cronsWithLengthsArray.length; i++) { 
+        iterator = true;
         var interval = parser.parseExpression(cronsWithLengthsArray[i].cronExpression, options);
-        var obj = {};
-        obj.startDate =Convert_cron_value_to_date(startDate.value);
-        interval.next();
-        obj.endDate = addMinutes(Convert_cron_value_to_date(startDate.value), cronsWithLengthsArray[i].taskLengthInMinutes);
-        taskDatesArray.push(obj);
+        while (true) {
+            try {
+                var obj = {};
+                obj.startDate = Convert_cron_value_to_date(interval.next().value);
+                obj.endDate = addMinutes(obj.startDate, cronsWithLengthsArray[i].taskLengthInMinutes);
+                allTaskDatesArray.push([obj.startDate, obj.endDate]);
+            }
+            catch (e) {
+                break;
+            }
+        }
     }
 }
 
 
 
 try {
-    var smallestInterval = Find_smallest_cron(cronExprArray, 21);
     populateCronsWithLengths();
-    while (true) {
-        try {
-            var obj = smallestInterval.next();
-            findEndDates(obj, 21);
-        }
-        catch (e) {
-            break;
-        }
-    }
-    for (let i = 0; i < taskDatesArray.length; i++) {
-        console.log('Start date: ' + taskDatesArray[i].startDate + ' End date: ' + taskDatesArray[i].endDate);
+    findEndDates(cronsWithLengthsArray, 21);
+    finalArray = mergeRanges(allTaskDatesArray);
+    for (let i = 0; i < finalArray.length; i++) {
+        console.log('Start date: ' + finalArray[i][0] + ' End date: ' + finalArray[i][1]);
     }
 }
 catch (err) {
@@ -93,7 +95,7 @@ function Convert_cron_value_to_date(cron_value){
     return finalDate;
 }
 
-function Find_smallest_cron(inputCronArray, numberOfDays) {
+/*function Find_smallest_cron(inputCronArray, numberOfDays) {
     var options = {
         currentDate: new Date(),
         endDate: addDays(Date(), numberOfDays),
@@ -127,7 +129,7 @@ function Find_smallest_cron(inputCronArray, numberOfDays) {
     return smallestInterval;
 }
 
-/*try {
+try {
     var smallestInterval = Find_smallest_cron(cronExprArray, 21);
     while (true) {
         try {
@@ -148,5 +150,4 @@ function Find_smallest_cron(inputCronArray, numberOfDays) {
 catch (err) {
     console.log('Error: ' + err.message);
 }*/
-
     
