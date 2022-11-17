@@ -38,19 +38,19 @@ function populateCronsWithLengths(){
     }
 }
 
-function findEndDates(numberOfDays){
+function findEndDates(startDate, numberOfDays){
     var options = {
         currentDate: new Date(),
         endDate: addDays(Date(), numberOfDays),
         iterator: true
     };
-    populateCronsWithLengths();
+    
     for (let i = 0; i < cronsWithLengthsArray.length; i++) {
         var interval = parser.parseExpression(cronsWithLengthsArray[i].cronExpression, options);
         var obj = {};
-        obj.startDate =Convert_cron_value_to_date(interval.next().value);
+        obj.startDate =Convert_cron_value_to_date(startDate.value);
         interval.next();
-        obj.endDate = addMinutes(Convert_cron_value_to_date(interval.prev().value), cronsWithLengthsArray[i].taskLengthInMinutes);
+        obj.endDate = addMinutes(Convert_cron_value_to_date(startDate.value), cronsWithLengthsArray[i].taskLengthInMinutes);
         taskDatesArray.push(obj);
     }
 }
@@ -59,23 +59,26 @@ function findEndDates(numberOfDays){
 
 try {
     var smallestInterval = Find_smallest_cron(cronExprArray, 21);
+    populateCronsWithLengths();
     while (true) {
         try {
             var obj = smallestInterval.next();
-            findEndDates(21);
-            for (let i = 0; i < taskDatesArray.length; i++) {
-                console.log('Start date: ' + taskDatesArray[i].startDate + 'End date: ' + taskDatesArray[i].endDate);
-            }
-            
+            findEndDates(obj, 21);
         }
         catch (e) {
             break;
         }
     }
+    for (let i = 0; i < taskDatesArray.length; i++) {
+        console.log('Start date: ' + taskDatesArray[i].startDate + ' End date: ' + taskDatesArray[i].endDate);
+    }
 }
 catch (err) {
     console.log('Error: ' + err.message);
 }
+
+
+
 
 function getMonthFromString(mon){
     return new Date(Date.parse(mon +" 1, 2012")).getMonth()+1
