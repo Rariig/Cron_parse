@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "merge-ranges": "^1.0.2"
+  }
+}
