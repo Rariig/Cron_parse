@@ -33,16 +33,8 @@ function populateCronsWithLengths(){
     }
 }
 
-function convertCronToDate(cron_value){
-    month = getMonthFromString(String(cron_value).substring(4,7));
-    day = (String(cron_value).substring(8,10));
-    year = (String(cron_value).substring(11,15));
-    time = (String(cron_value).substring(16,24));
-    finalDate = new Date(String(month + '/' + day + '/' + year + ' '+ time));
-    return finalDate;
-}
 
-function convertCronToDate2(cron_value){
+function convertCronToDate(cron_value){
     var month = cron_value._date.month;
     var day = cron_value._date.day;
     var year = cron_value._date.year;
