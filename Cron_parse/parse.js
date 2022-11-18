@@ -2,7 +2,7 @@ var parser = require('cron-parser');
 var mergeRanges = require('merge-ranges');
 var addDays = require('./dateFunctions/addDays.js');
 var addMinutes = require('./dateFunctions/addMinutes.js');
-var getMonthFromString = require('./dateFunctions/getMonthFromString.js');
+var convertCronToDate = require('./cronFunctions/convertCronToDate.js');
 
 
 let cronWithTaskLength  = class{   
@@ -19,28 +19,27 @@ let taskDates  = class{
 }
 
 var cronExprArray = ['0 0 * * MON', '0 0 * * MON-FRI', '0 0 * * MON-WED'];
-var taskLengthsArray = [45, 60, 120];
+var tasksArray = [45, 60, 120];
 var cronsWithLengthsArray = [];
 var allTaskDatesArray = [];
 var finalArray= [];
 
-function populateCronsWithLengths(){
-    for (let i = 0; i <cronExprArray.length ; i++) {
+
+
+function mergeCronTasks(cronArray, taskLengthsArray, numberOfDays){
+    populateCronsWithLengths(cronArray, taskLengthsArray);
+    findEndDates(cronsWithLengthsArray, numberOfDays);
+    finalArray = mergeRanges(allTaskDatesArray);
+    return finalArray;
+}
+
+function populateCronsWithLengths(cronArray, taskLengthsArray){
+    for (let i = 0; i <cronArray.length ; i++) {
         var obj = {};
-        obj.cronExpression = cronExprArray[i];
+        obj.cronExpression = cronArray[i];
         obj.taskLengthInMinutes = taskLengthsArray[i];
         cronsWithLengthsArray.push(obj);
     }
-}
-
-
-function convertCronToDate(cron_value){
-    var month = cron_value._date.month;
-    var day = cron_value._date.day;
-    var year = cron_value._date.year;
-    var time = cron_value._date.hour + ':' + cron_value._date.minute + ':' + cron_value._date.second;
-    var finalDate = new Date(String(month + '/' + day + '/' + year + ' '+ time));
-    return finalDate;
 }
 
 function findEndDates(cronsWithLengthsArray, numberOfDays){
@@ -67,12 +66,8 @@ function findEndDates(cronsWithLengthsArray, numberOfDays){
     }
 }
 
-
-
 try {
-    populateCronsWithLengths();
-    findEndDates(cronsWithLengthsArray, 21);
-    finalArray = mergeRanges(allTaskDatesArray);
+    mergeCronTasks(cronExprArray, tasksArray , 21);
     for (let i = 0; i < finalArray.length; i++) {
         console.log('Start date: ' + finalArray[i][0] + ' End date: ' + finalArray[i][1]);
     }
@@ -84,63 +79,4 @@ catch (err) {
 
 
 
-
-
-
-
-/*function Find_smallest_cron(inputCronArray, numberOfDays) {
-    var options = {
-        currentDate: new Date(),
-        endDate: addDays(Date(), numberOfDays),
-        iterator: true
-    };
-    var testArray = new Array();
-    var smallestInterval;
-    x = 0;
-
-    for (var i = 0; i < inputCronArray.length; i++) {
-        var interval = parser.parseExpression(inputCronArray[i], options);
-        var obj = interval.next();
-        obj = interval.next();
-        testArray.push(obj.value);
-        if (testArray.length > 1) {
-            if (Convert_cron_value_to_date(testArray[x]).getTime() < Convert_cron_value_to_date(testArray[i]).getTime()) {
-                var interval = parser.parseExpression(inputCronArray[x], options);
-                smallestInterval = interval;
-            }
-            else if (Convert_cron_value_to_date(testArray[x]).getTime() > Convert_cron_value_to_date(testArray[i]).getTime()) {
-                var interval = parser.parseExpression(inputCronArray[i], options);
-                x = i;
-                smallestInterval = interval;
-            }
-        }
-        else if (testArray.length == 1) {
-            var interval = parser.parseExpression(inputCronArray[i], options);
-            smallestInterval = interval;
-        }
-    }
-    return smallestInterval;
-}
-
-try {
-    var smallestInterval = Find_smallest_cron(cronExprArray, 21);
-    while (true) {
-        try {
-            var obj = smallestInterval.next();
-            console.log(obj.value.toString(), ' ', obj.done);
-        }
-        catch (e) {
-            break;
-        }
-    }
-    // value: Wed Dec 26 2012 14:44:00 GMT+0200 (EET) done: false
-    // value: Wed Dec 26 2012 15:00:00 GMT+0200 (EET) done: false
-    // value: Wed Dec 26 2012 15:22:00 GMT+0200 (EET) done: false
-    // value: Wed Dec 26 2012 15:44:00 GMT+0200 (EET) done: false
-    // value: Wed Dec 26 2012 16:00:00 GMT+0200 (EET) done: false
-    // value: Wed Dec 26 2012 16:22:00 GMT+0200 (EET) done: true
-}
-catch (err) {
-    console.log('Error: ' + err.message);
-}*/
     
