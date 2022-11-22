@@ -17,13 +17,34 @@ let taskDates  = class{
      endDate;
     }
 }
-
-var cronExprArray = ['0 0 * * MON', '0 0 * * MON-FRI', '0 0 * * MON-WED'];
-var tasksArray = [45, 60, 120];
+var custom = '0 0 * * MON,WED_4 22 5 33_21'; // consists of 3 parts: 'cron_startDate endDate_daysToExecute'
+var cronExprArray = [] //, '0 0 * * MON-FRI', '0 0 * * MON-WED'];
+var tasksArray = [] //,60]//, 120];
 var cronsWithLengthsArray = [];
 var allTaskDatesArray = [];
 var finalArray= [];
 
+function getTaskLength (customExpression){
+    var customTaskLength = customExpression.split('_')[1];    
+    customTaskLength = parseInt(customTaskLength.split(' ')[2]*60 - customTaskLength.split(' ')[0]*60)
+    + parseInt(customTaskLength.split(' ')[3]-customTaskLength.split(' ')[1]);
+    tasksArray.push(customTaskLength); 
+    return customTaskLength;
+}
+
+function getDaysToRun(customExpression){
+    var customDaysToRun = parseInt(customExpression.split('_')[2]);
+    return customDaysToRun;  
+}
+
+function getCron(customExpression){
+    var cron = customExpression.split('_')[0];
+    var customTaskLength = customExpression.split('_')[1];
+    cron = cron.replace(cron.split(' ')[0], customTaskLength.split(' ')[1])
+    cron = cron.replace(cron.split(' ')[1], customTaskLength.split(' ')[0])
+    cronExprArray.push(cron)
+    return cron;
+}
 
 
 function mergeCronTasks(cronArray, taskLengthsArray, numberOfDays){
@@ -44,7 +65,7 @@ function populateCronsWithLengths(cronArray, taskLengthsArray){
 
 function findEndDates(cronsWithLengthsArray, numberOfDays){
     var options = {
-        currentDate: new Date(),
+        currentDate: new Date('November 24, 2022 03:24:00'),
         endDate: addDays(Date(), numberOfDays),
         iterator: true
     };
@@ -67,7 +88,9 @@ function findEndDates(cronsWithLengthsArray, numberOfDays){
 }
 
 try {
-    mergeCronTasks(cronExprArray, tasksArray , 21);
+    getCron(custom);
+    getTaskLength(custom);
+    mergeCronTasks(cronExprArray, tasksArray , getDaysToRun(custom));
     for (let i = 0; i < finalArray.length; i++) {
         console.log('Start date: ' + finalArray[i][0] + ' End date: ' + finalArray[i][1]);
     }
@@ -77,6 +100,14 @@ catch (err) {
 }
 
 
+/*try {
+    console.log(getTaskLength(custom));
+    console.log(getDaysToRun(custom));
+    console.log(getCron(custom));
 
+}
+catch (err) {
+    console.log('Error: ' + err.message);
+}*/
 
     
