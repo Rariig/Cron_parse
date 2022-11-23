@@ -17,9 +17,18 @@ let taskDates  = class{
      endDate;
     }
 }
-var custom = '0 0 * * MON,WED_4 22 5 33_21'; // consists of 3 parts: 'cron_startDate endDate_daysToExecute'
-var cronExprArray = [] //, '0 0 * * MON-FRI', '0 0 * * MON-WED'];
-var tasksArray = [] //,60]//, 120];
+
+
+// consists of 3 parts: 'cron_startDate endDate_daysToExecute'
+var custom = 
+//'0 0 * 11 *_4 22 5 33_21'; //every day during nov 4.22-5.33 
+//'0 0 12,26,28 * *_4 22 5 33_21'; //every 12,26,28 day during any month at 4.22-5.33 for 21 days from start
+'0 0 * * *_4 22 5 33_21'; // every day for 21 days at 4.22-5.33
+//'0 0 * * MON,WED_4 22 5 33_21'; // every Monday and Wednesday for 21 days at 4.22-5.33
+//'0 */3 * * *_4 22 5 33_21'; // every 3 hours starting from 4.22 today for 21 days
+
+var cronExprArray = [];
+var tasksArray = [];
 var cronsWithLengthsArray = [];
 var allTaskDatesArray = [];
 var finalArray= [];
@@ -65,7 +74,7 @@ function populateCronsWithLengths(cronArray, taskLengthsArray){
 
 function findEndDates(cronsWithLengthsArray, numberOfDays){
     var options = {
-        currentDate: new Date('November 24, 2022 03:24:00'),
+        currentDate: new Date(),
         endDate: addDays(Date(), numberOfDays),
         iterator: true
     };
