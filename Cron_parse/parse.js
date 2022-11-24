@@ -25,7 +25,7 @@ var custom =
 //'* * 12,26,28 * *_4 22 5 33_21'; //every 12,26,28 day during any month at 4.22-5.33 for 21 days from start
 //'* * * * *_4 22 5 33_21'; // every day for 21 days at 4.22-5.33
 //'* * * * MON,WED_4 22 5 33_21'; // every Monday and Wednesday for 21 days at 4.22-5.33
-'*/30 */3 * * *_4 22 5 33_21'; // every 3 hours starting from 4.22 today for 21 days
+'* */3 * * *_4 22 5 33_21'; // every 3 hours starting from 4.22 today for 21 days
 
 var cronExprArray = [];
 var tasksArray = [];
@@ -34,6 +34,49 @@ var allTaskDatesArray = [];
 var arrayOfCronForOftenRecurringTask=[];
 var finalArray= [];
 
+function populateArraysWithOftenRecurring(customExpression){
+    cronExprArray.push(getCron(customExpression));
+    var minutesLeft = getRunningTimeInMinutes(customExpression);
+    hoursToAdd= parseInt(getRecurrenceInMinutes(customExpression)/60)
+    minutesToAdd = getRecurrenceInMinutes(customExpression) % 60
+    temp = customExpression;
+    while (minutesLeft >= 0) {
+        tasksArray.push(getTaskLength(customExpression));
+        tempHours = parseInt(temp.split('_')[1].split(' ')[0]) + hoursToAdd
+        tempMinutes = parseInt(temp.split('_')[1].split(' ')[1]) + minutesToAdd
+        if(tempMinutes >= 60){
+            tempMinutes -=60
+            tempHours +=1
+        }
+        if (tempHours >= 24) {
+            tempHours -= 24;
+        }
+        /*if(tempHours == parseInt(temp.split('_')[1].split(' ')[1])){
+         
+        }*/
+        temp = temp.replace(temp.split('_')[1].split(' ')[1], tempMinutes)
+        temp = temp.replace(temp.split('_')[1].split(' ')[0], tempHours)
+        
+    isInCronList = false;
+     for (let i = 0; i < cronExprArray.length; i++) {
+        if (getCron(temp) == cronExprArray[i]) {
+            isInCronList = true;
+        }
+        
+    }
+    if (isInCronList == false) {
+        cronExprArray.push(getCron(temp));
+    }
+
+        minutesLeft -= getRecurrenceInMinutes(customExpression);
+    }
+
+    
+}
+
+function getRunningTimeInMinutes(customExpression){
+    return getDaysToRun(customExpression)*24*60;
+}
 function getRecurrenceInMinutes(customExpression){
     var recurrenceInMinutes =0;
     if (customExpression.split(' ')[0].indexOf('/')> -1) {
@@ -56,7 +99,7 @@ function getTaskLength (customExpression){
     var customTaskLength = customExpression.split('_')[1];    
     customTaskLength = parseInt(customTaskLength.split(' ')[2]*60 - customTaskLength.split(' ')[0]*60)
     + parseInt(customTaskLength.split(' ')[3]-customTaskLength.split(' ')[1]);
-    tasksArray.push(customTaskLength); 
+    //tasksArray.push(customTaskLength); 
     return customTaskLength;
 }
 
@@ -139,6 +182,13 @@ catch (err) {
 try {
     console.log(getRecurrenceInMinutes(custom));
     console.log(generateRecurringCrons(custom));
+    console.log(getRunningTimeInMinutes(custom));
+
+    populateArraysWithOftenRecurring(custom);
+    mergeCronTasks(cronExprArray, tasksArray , getDaysToRun(custom));
+    for (let i = 0; i < finalArray.length; i++) {
+        console.log('Start date: ' + finalArray[i][0] + ' End date: ' + finalArray[i][1]);
+    }
 
 }
 catch (err) {
