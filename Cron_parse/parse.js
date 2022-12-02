@@ -25,7 +25,7 @@ var custom =
 //'* * 12,26,28 * *_4 22 5 33_21'; //every 12,26,28 day during any month at 4.22-5.33 for 21 days from start
 //'* * * * *_4 22 5 33_21'; // every day for 21 days at 4.22-5.33
 //'* * * * MON,WED_4 22 5 33_21'; // every Monday and Wednesday for 21 days at 4.22-5.33
-'* */3 * * *_4 22 5 33_21'; // every 3 hours starting from 4.22 today for 21 days
+'*/30 * * * *_4 22 4 29_21'; // every 3 hours starting from 4.22 today for 21 days
 
 var cronExprArray = [];
 var tasksArray = [];
@@ -38,7 +38,7 @@ function populateArraysWithOftenRecurring(customExpression){
     cronExprArray.push(getCron(customExpression));
     var minutesLeft = getRunningTimeInMinutes(customExpression);
     hoursToAdd= parseInt(getRecurrenceInMinutes(customExpression)/60)
-    minutesToAdd = getRecurrenceInMinutes(customExpression) % 60
+    minutesToAdd = parseInt(getRecurrenceInMinutes(customExpression) % 60)
     temp = customExpression;
     while (minutesLeft >= 0) {
         tasksArray.push(getTaskLength(customExpression));
@@ -51,19 +51,43 @@ function populateArraysWithOftenRecurring(customExpression){
         if (tempHours >= 24) {
             tempHours -= 24;
         }
-        /*if(tempHours == parseInt(temp.split('_')[1].split(' ')[1])){
-         
-        }*/
-        temp = temp.replace(temp.split('_')[1].split(' ')[1], tempMinutes)
-        temp = temp.replace(temp.split('_')[1].split(' ')[0], tempHours)
+        if (tempHours == tempMinutes) {
+            temp = temp.replace(temp.split('_')[1].split(' ')[1], tempMinutes)
+            temp = temp.replace(temp.split('_')[1].split(' ')[0], tempHours)
+            cronExprArray.push(getCron(temp));
+            
+            
+
+            tempMinutes = parseInt(temp.split('_')[1].split(' ')[1]) + minutesToAdd
+            let t = 0;
+            var replace = "regex\\d";
+            var re = new RegExp(replace,"g");
+            const result = temp.replace(re, match => ++t === 2 ? tempMinutes : match);
+            temp = result;
+            cronExprArray.push(getCron(temp));
+        }
+        else if(tempHours != tempMinutes){
+            temp = temp.replace(temp.split('_')[1].split(' ')[1], tempMinutes)
+            temp = temp.replace(temp.split('_')[1].split(' ')[0], tempHours)
+        }
+        
+        
+        
+       
+        
+       
+        
+        
         
     isInCronList = false;
+    
      for (let i = 0; i < cronExprArray.length; i++) {
         if (getCron(temp) == cronExprArray[i]) {
             isInCronList = true;
         }
         
     }
+    
     if (isInCronList == false) {
         cronExprArray.push(getCron(temp));
     }
@@ -119,8 +143,8 @@ function replaceCronMinutesAndHours(customExpression){
 function getCron(customExpression){
     var cron = customExpression.split('_')[0];
     var customTaskLength = customExpression.split('_')[1];
-    cron = cron.replace(cron.split(' ')[0], customTaskLength.split(' ')[1])
     cron = cron.replace(cron.split(' ')[1], customTaskLength.split(' ')[0])
+    cron = cron.replace(cron.split(' ')[0], customTaskLength.split(' ')[1])
     //cronExprArray.push(cron)
     return cron;
 }
@@ -144,8 +168,8 @@ function populateCronsWithLengths(cronArray, taskLengthsArray){
 
 function findEndDates(cronsWithLengthsArray, numberOfDays){
     var options = {
-        currentDate: new Date(),
-        endDate: addDays(Date(), numberOfDays),
+        currentDate: new Date('December 2, 2022 22:16:00'),
+        endDate: addDays(Date('December 2, 2022 22:16:00'), numberOfDays),
         iterator: true
     };
 
