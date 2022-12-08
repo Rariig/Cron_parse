@@ -3,6 +3,7 @@ var mergeRanges = require('merge-ranges');
 var addDays = require('./dateFunctions/addDays.js');
 var addMinutes = require('./dateFunctions/addMinutes.js');
 var convertCronToDate = require('./cronFunctions/convertCronToDate.js');
+const { get } = require('https');
 
 
 let cronWithTaskLength  = class{   
@@ -25,23 +26,60 @@ var custom =
 //'* * 12,26,28 * *_4 22 5 33_21'; //every 12,26,28 day during any month at 4.22-5.33 for 21 days from start
 //'* * * * *_4 22 5 33_21'; // every day for 21 days at 4.22-5.33
 //'* * * * MON,WED_4 22 5 33_21'; // every Monday and Wednesday for 21 days at 4.22-5.33
-'*/30 * * * *_4 22 4 29_21'; // every 3 hours starting from 4.22 today for 21 days
+'*/30 */3 * * *_4 22 4 29_21'; // every 3 hours starting from 4.22 today for 21 days
 
 var cronExprArray = [];
 var tasksArray = [];
 var cronsWithLengthsArray = [];
 var allTaskDatesArray = [];
-var arrayOfCronForOftenRecurringTask=[];
 var finalArray= [];
 
 function populateArraysWithOftenRecurring(customExpression){
-    cronExprArray.push(getCron(customExpression));
+    //cronExprArray.push(getCron(customExpression));
     var minutesLeft = getRunningTimeInMinutes(customExpression);
     hoursToAdd= parseInt(getRecurrenceInMinutes(customExpression)/60)
     minutesToAdd = parseInt(getRecurrenceInMinutes(customExpression) % 60)
     temp = customExpression;
-    while (minutesLeft >= 0) {
-        tasksArray.push(getTaskLength(customExpression));
+    tempTaskRunningTimes = customExpression.split('_')[1];
+    const date = new Date();
+    tempDay = date.getDate();
+    tempMonth = date.getMonth();
+    while (minutesLeft > 0) {
+        if (hoursToAdd != 0 && minutesToAdd != 0) {
+            //cronExprArray.push(getCron(customExpression));
+            tempHours = parseInt(tempTaskRunningTimes.split(' ')[0]) + hoursToAdd
+            tempMinutes = parseInt(tempTaskRunningTimes.split(' ')[1]) + minutesToAdd
+            
+            if(tempMinutes >= 60){
+                tempMinutes -=60
+                tempHours +=1
+            }
+            if (tempHours >= 24) {
+                tempHours -= 24;
+                tempDay ++;
+            }
+            tempTaskRunningTimes=tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[1], tempMinutes)
+            tempTaskRunningTimes= tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[0], tempHours)//which way
+            
+            tempHours2 = tempHours
+            tempMinutes2 =tempMinutes+getTaskLength(temp)
+            if(tempMinutes2 >= 60){
+                tempMinutes2 -=60
+                tempHours2 +=1
+            }
+            if (tempHours2 >= 24) {
+                tempHours2 -= 24;
+            }
+            tempTaskRunningTimes= tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[2], tempHours2)
+            tempTaskRunningTimes=tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[3], tempMinutes2)
+            var obj = {};
+            obj.startDate = new Date(2022, tempMonth ,tempDay,tempTaskRunningTimes.split(' ')[0],tempTaskRunningTimes.split(' ')[1])
+            obj.endDate = new Date(2022, tempMonth, tempDay,tempTaskRunningTimes.split(' ')[2],tempTaskRunningTimes.split(' ')[3])
+            allTaskDatesArray.push([obj.startDate, obj.endDate]);
+            minutesLeft -= getRecurrenceInMinutes(customExpression)
+        } 
+        else {
+            tasksArray.push(getTaskLength(customExpression));
         tempHours = parseInt(temp.split('_')[1].split(' ')[0]) + hoursToAdd
         tempMinutes = parseInt(temp.split('_')[1].split(' ')[1]) + minutesToAdd
         if(tempMinutes >= 60){
@@ -56,8 +94,6 @@ function populateArraysWithOftenRecurring(customExpression){
             temp = temp.replace(temp.split('_')[1].split(' ')[0], tempHours)
             cronExprArray.push(getCron(temp));
             
-            
-
             tempMinutes = parseInt(temp.split('_')[1].split(' ')[1]) + minutesToAdd
             let t = 0;
             var replace = "regex\\d";
@@ -70,16 +106,7 @@ function populateArraysWithOftenRecurring(customExpression){
             temp = temp.replace(temp.split('_')[1].split(' ')[1], tempMinutes)
             temp = temp.replace(temp.split('_')[1].split(' ')[0], tempHours)
         }
-        
-        
-        
-       
-        
-       
-        
-        
-        
-    isInCronList = false;
+        isInCronList = false;
     
      for (let i = 0; i < cronExprArray.length; i++) {
         if (getCron(temp) == cronExprArray[i]) {
@@ -94,7 +121,7 @@ function populateArraysWithOftenRecurring(customExpression){
 
         minutesLeft -= getRecurrenceInMinutes(customExpression);
     }
-
+    }
     
 }
 
@@ -143,8 +170,8 @@ function replaceCronMinutesAndHours(customExpression){
 function getCron(customExpression){
     var cron = customExpression.split('_')[0];
     var customTaskLength = customExpression.split('_')[1];
-    cron = cron.replace(cron.split(' ')[1], customTaskLength.split(' ')[0])
     cron = cron.replace(cron.split(' ')[0], customTaskLength.split(' ')[1])
+    cron = cron.replace(cron.split(' ')[1], customTaskLength.split(' ')[0])
     //cronExprArray.push(cron)
     return cron;
 }
