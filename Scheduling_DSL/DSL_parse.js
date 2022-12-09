@@ -26,7 +26,7 @@ var custom =
 //'* * 12,26,28 * *_4 22 5 33_21'; //every 12,26,28 day during any month at 4.22-5.33 for 21 days from start
 //'* * * * *_4 22 5 33_21'; // every day for 21 days at 4.22-5.33
 //'* * * * MON,WED_4 22 5 33_21'; // every Monday and Wednesday for 21 days at 4.22-5.33
-'*/30 */3 * * *_4 22 4 29_21'; // every 3 hours starting from 4.22 today for 21 days
+'*/30 * * * *_4 22 4 29_21'; // every 3 hours starting from 4.22 today for 21 days
 
 var cronExprArray = [];
 var tasksArray = [];
@@ -35,7 +35,7 @@ var allTaskDatesArray = [];
 var finalArray= [];
 
 function populateArraysWithOftenRecurring(customExpression){
-    //cronExprArray.push(getCron(customExpression));
+    cronExprArray.push(getCron(customExpression));
     var minutesLeft = getRunningTimeInMinutes(customExpression);
     hoursToAdd= parseInt(getRecurrenceInMinutes(customExpression)/60)
     minutesToAdd = parseInt(getRecurrenceInMinutes(customExpression) % 60)
@@ -46,7 +46,6 @@ function populateArraysWithOftenRecurring(customExpression){
     tempMonth = date.getMonth();
     while (minutesLeft > 0) {
         if (hoursToAdd != 0 && minutesToAdd != 0) {
-            //cronExprArray.push(getCron(customExpression));
             tempHours = parseInt(tempTaskRunningTimes.split(' ')[0]) + hoursToAdd
             tempMinutes = parseInt(tempTaskRunningTimes.split(' ')[1]) + minutesToAdd
             
@@ -79,7 +78,7 @@ function populateArraysWithOftenRecurring(customExpression){
             minutesLeft -= getRecurrenceInMinutes(customExpression)
         } 
         else {
-            tasksArray.push(getTaskLength(customExpression));
+        tasksArray.push(getTaskLength(customExpression));
         tempHours = parseInt(temp.split('_')[1].split(' ')[0]) + hoursToAdd
         tempMinutes = parseInt(temp.split('_')[1].split(' ')[1]) + minutesToAdd
         if(tempMinutes >= 60){
@@ -93,13 +92,11 @@ function populateArraysWithOftenRecurring(customExpression){
             temp = temp.replace(temp.split('_')[1].split(' ')[1], tempMinutes)
             temp = temp.replace(temp.split('_')[1].split(' ')[0], tempHours)
             cronExprArray.push(getCron(temp));
-            
-            tempMinutes = parseInt(temp.split('_')[1].split(' ')[1]) + minutesToAdd
-            let t = 0;
-            var replace = "regex\\d";
-            var re = new RegExp(replace,"g");
-            const result = temp.replace(re, match => ++t === 2 ? tempMinutes : match);
-            temp = result;
+            tempHours+=hoursToAdd;
+            tempMinutes+= minutesToAdd;
+            temp = temp.replace(temp.split('_')[1].split(' ')[1], 55)
+            temp = temp.replace(temp.split('_')[1].split(' ')[1], tempMinutes)
+            temp = temp.replace(temp.split('_')[1].split(' ')[0], tempHours)
             cronExprArray.push(getCron(temp));
         }
         else if(tempHours != tempMinutes){
