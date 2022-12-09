@@ -26,7 +26,7 @@ var custom =
 //'* * 12,26,28 * *_4 22 5 33_21'; //every 12,26,28 day during any month at 4.22-5.33 for 21 days from start
 //'* * * * *_4 22 5 33_21'; // every day for 21 days at 4.22-5.33
 //'* * * * MON,WED_4 22 5 33_21'; // every Monday and Wednesday for 21 days at 4.22-5.33
-'*/30 * * * *_4 22 4 29_21'; // every 3 hours starting from 4.22 today for 21 days
+'*/30 */3 * * *_4 22 4 29_21'; // every 3 hours starting from 4.22 today for 21 days
 
 var cronExprArray = [];
 var tasksArray = [];
@@ -35,7 +35,7 @@ var allTaskDatesArray = [];
 var finalArray= [];
 
 function populateArraysWithOftenRecurring(customExpression){
-    cronExprArray.push(getCron(customExpression));
+    //cronExprArray.push(getCron(customExpression));
     var minutesLeft = getRunningTimeInMinutes(customExpression);
     hoursToAdd= parseInt(getRecurrenceInMinutes(customExpression)/60)
     minutesToAdd = parseInt(getRecurrenceInMinutes(customExpression) % 60)
@@ -57,9 +57,9 @@ function populateArraysWithOftenRecurring(customExpression){
                 tempHours -= 24;
                 tempDay ++;
             }
+            tempTaskRunningTimes=tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[1], 99)
             tempTaskRunningTimes=tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[1], tempMinutes)
             tempTaskRunningTimes= tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[0], tempHours)//which way
-            
             tempHours2 = tempHours
             tempMinutes2 =tempMinutes+getTaskLength(temp)
             if(tempMinutes2 >= 60){
@@ -69,8 +69,18 @@ function populateArraysWithOftenRecurring(customExpression){
             if (tempHours2 >= 24) {
                 tempHours2 -= 24;
             }
-            tempTaskRunningTimes= tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[2], tempHours2)
+            tempTaskRunningTimes=tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[3], 55)
             tempTaskRunningTimes=tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[3], tempMinutes2)
+            lol = tempTaskRunningTimes.split(' ')
+             //if split[2] is a number that is also in split[0] or [1], then can't replace like this 
+            if(tempTaskRunningTimes.split(' ')[1].includes(tempTaskRunningTimes.split(' ')[2])){
+                tempTaskRunningTimes= tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[1], 99)
+                tempTaskRunningTimes= tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[2], tempHours2)
+                tempTaskRunningTimes= tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[1], tempMinutes)
+            }
+            else{
+                tempTaskRunningTimes= tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[2], tempHours2)
+            }
             var obj = {};
             obj.startDate = new Date(2022, tempMonth ,tempDay,tempTaskRunningTimes.split(' ')[0],tempTaskRunningTimes.split(' ')[1])
             obj.endDate = new Date(2022, tempMonth, tempDay,tempTaskRunningTimes.split(' ')[2],tempTaskRunningTimes.split(' ')[3])
@@ -78,6 +88,7 @@ function populateArraysWithOftenRecurring(customExpression){
             minutesLeft -= getRecurrenceInMinutes(customExpression)
         } 
         else {
+        
         tasksArray.push(getTaskLength(customExpression));
         tempHours = parseInt(temp.split('_')[1].split(' ')[0]) + hoursToAdd
         tempMinutes = parseInt(temp.split('_')[1].split(' ')[1]) + minutesToAdd
