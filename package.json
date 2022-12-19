@@ -1,5 +1,11 @@
 {
   "dependencies": {
     "merge-ranges": "^1.0.2"
+  },
+  "devDependencies": {
+    "jest": "^29.3.1"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }
