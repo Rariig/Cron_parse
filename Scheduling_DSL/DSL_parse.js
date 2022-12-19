@@ -184,6 +184,8 @@ function getCron(customExpression){
     return cron;
 }
 
+module.exports = getCron;
+
 
 function mergeCronTasks(cronArray, taskLengthsArray, numberOfDays){
     populateCronsWithLengths(cronArray, taskLengthsArray);
