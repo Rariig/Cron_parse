@@ -22,7 +22,7 @@ let taskDates  = class{
 
 // consists of 3 parts: 'cron_startDate endDate_daysToExecute'
 var custom = 
-//'* * * 11 *_4 22 5 33_21'; //every day during nov 4.22-5.33 
+//'* * * 12 *_4 22 5 33_21'; //every day during dec 4.22-5.33 
 //'* * 12,26,28 * *_4 22 5 33_21'; //every 12,26,28 day during any month at 4.22-5.33 for 21 days from start
 //'* * * * *_4 22 5 33_21'; // every day for 21 days at 4.22-5.33
 //'* * * * MON,WED_4 22 5 33_21'; // every Monday and Wednesday for 21 days at 4.22-5.33
@@ -69,7 +69,7 @@ function populateArraysWithOftenRecurring(customExpression){
             if (tempHours2 >= 24) {
                 tempHours2 -= 24;
             }
-            tempTaskRunningTimes=tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[3], 55)
+            tempTaskRunningTimes=tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[3], 99)
             tempTaskRunningTimes=tempTaskRunningTimes.replace(tempTaskRunningTimes.split(' ')[3], tempMinutes2)
             lol = tempTaskRunningTimes.split(' ')
              //if split[2] is a number that is also in split[0] or [1], then can't replace like this 
@@ -105,7 +105,7 @@ function populateArraysWithOftenRecurring(customExpression){
             cronExprArray.push(getCron(temp));
             tempHours+=hoursToAdd;
             tempMinutes+= minutesToAdd;
-            temp = temp.replace(temp.split('_')[1].split(' ')[1], 55)
+            temp = temp.replace(temp.split('_')[1].split(' ')[1], 99)
             temp = temp.replace(temp.split('_')[1].split(' ')[1], tempMinutes)
             temp = temp.replace(temp.split('_')[1].split(' ')[0], tempHours)
             cronExprArray.push(getCron(temp));
@@ -126,8 +126,10 @@ function populateArraysWithOftenRecurring(customExpression){
     if (isInCronList == false) {
         cronExprArray.push(getCron(temp));
     }
-
-        minutesLeft -= getRecurrenceInMinutes(customExpression);
+    if(getRecurrenceInMinutes(customExpression) == 0){
+        minutesLeft = 0;
+    }
+    else{minutesLeft -= getRecurrenceInMinutes(customExpression)} 
     }
     }
     
@@ -184,7 +186,7 @@ function getCron(customExpression){
     return cron;
 }
 
-module.exports = getCron;
+//module.exports = getCron;
 
 
 function mergeCronTasks(cronArray, taskLengthsArray, numberOfDays){
