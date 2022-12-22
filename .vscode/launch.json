@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\Cron_parse\\parse.js"
+            "program": "${workspaceFolder}\\Scheduling_DSL\\DSL_parse.js"
         }
     ]
 }
